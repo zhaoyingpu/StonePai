@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:orientation="vertical" >
+
+	<include layout="@layout/task_list_item"/>
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:gravity="right"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/task_action1"
+            android:layout_width="96dp"
+            android:layout_height="32dp"
+            android:layout_marginRight="8dp"
+            android:background="@drawable/shape_button"
+            android:gravity="center"
+            android:text="完成任务"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/task_action2"
+            android:layout_width="96dp"
+            android:layout_height="32dp"
+            android:background="@drawable/shape_button"
+            android:gravity="center"
+            android:text="完成任务"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</LinearLayout>
