@@ -3,12 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <include
+    <com.stone.pai.ui.SwipeRefreshListLayout
+        android:id="@+id/id_swipe_Refresh"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="wrap_content" 
+        android:layout_above="@+id/id_deliver"
+        android:layout_alignParentTop="true" >
+	    <include
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        layout="@android:layout/list_content" />
+    </com.stone.pai.ui.SwipeRefreshListLayout>
+    
+    <View 
+        android:id="@+id/id_deliver"
+	    android:layout_width="fill_parent"
+	    android:layout_height="1dp"
         android:layout_above="@+id/editTexts"
-        android:layout_alignParentTop="true"
-        layout="@android:layout/list_content" />
+	    android:background="@android:color/darker_gray"/>
     
     <FrameLayout
         android:id="@+id/fButtons"
@@ -73,7 +85,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@drawable/ic_menu_send" >
+            android:src="@drawable/ic_menu_send" 
+            android:visibility="gone">
         </ImageView>
     </FrameLayout>
     

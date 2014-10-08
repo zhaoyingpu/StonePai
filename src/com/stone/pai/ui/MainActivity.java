@@ -2,6 +2,9 @@ package com.stone.pai.ui;
 
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 import com.stone.pai.ListLoader;
 import com.stone.pai.R;
 import com.stone.pai.TaskList;
@@ -23,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ListView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -119,6 +123,7 @@ public class MainActivity extends Activity implements
 		private static final String ARG_ORDERBY = "orderby";
 		private TaskListAdapter mTaskListAdapter;
 		
+		@InjectView(R.id.id_swipe_Refresh) SwipeRefreshListLayout swipeRefreshLayout;
 		/**
 		 * Returns a new instance of this fragment for the given section number.
 		 */
@@ -145,13 +150,14 @@ public class MainActivity extends Activity implements
 	        // remove the dividers from the ListView of the ListFragment
 	        getListView().setDivider(new ColorDrawable(Color.rgb(170, 170, 170)));
 	        getListView().setDividerHeight(1);
-	        //setOnRefreshListener(this);
+	        swipeRefreshLayout.setOnRefreshListener(this);
 	    }
 		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 		    View view = inflater.inflate(R.layout.fragment_main, container, false);
+		    ButterKnife.inject(this, view);
 		    return view;
 		}
 		
@@ -211,7 +217,7 @@ public class MainActivity extends Activity implements
 	            setListShownNoAnimation(true);
 	        }
 	        
-	        //setRefreshing(false);
+	        swipeRefreshLayout.setRefreshing(false);
 		}
 
 		@Override

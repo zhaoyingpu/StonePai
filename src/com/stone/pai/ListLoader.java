@@ -69,7 +69,7 @@ public class ListLoader<D> extends Loader<List<D>> {
 						JSONArray items = listBean.getJSONArray("items");
 						mItems = new ArrayList<D>(items.size());
 						for(int i=0; i<items.size(); ++i)
-							mItems.set(i, TypeUtils.castToJavaBean(items.get(i), clazz));
+							mItems.add(TypeUtils.castToJavaBean(items.get(i), clazz));
 					}
 
 					deliverResult(mItems);
