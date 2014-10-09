@@ -1,5 +1,7 @@
 package com.stone.pai;
 
+import java.util.List;
+
 public class TaskList {
 	private String name;
 	private String filter;
