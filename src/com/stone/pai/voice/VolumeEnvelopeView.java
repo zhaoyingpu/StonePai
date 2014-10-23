@@ -3,6 +3,7 @@ package com.stone.pai.voice;
 import java.util.LinkedList;
 
 import com.stone.pai.R;
+import com.stone.pai.ui.MainFragment;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -10,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
+
 
 public class VolumeEnvelopeView extends View {
 	private static final String TAG = null;
@@ -97,7 +99,7 @@ public class VolumeEnvelopeView extends View {
 		super.onDraw(canvas);
 
 		int size = mEnvelope.size();
-		int width = canvas.getWidth();// / (VoiceController.MAX_TIME / VoiceController.INTERVAL);
+		int width = canvas.getWidth() / (MainFragment.MAX_TIME / MainFragment.INTERVAL);
 		int x = canvas.getWidth() - width * size;
 
 		int height = (this.getHeight() - this.getPaddingBottom() - this.getPaddingTop()) / 2;

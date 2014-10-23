@@ -1,14 +1,21 @@
 package com.stone.pai.ui;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.Loader;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.media.AudioFormat;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
+import android.media.MediaRecorder.AudioSource;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Editable;
@@ -29,6 +36,7 @@ import android.widget.AbsListView.OnScrollListener;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
+import com.stone.common.StoneLog;
 import com.stone.pai.ListLoader;
 import com.stone.pai.R;
 import com.stone.pai.TaskList;
@@ -51,28 +59,34 @@ public class MainFragment extends ListFragment implements
 	private static final String ARG_FILTER = "filter";
 	private static final String ARG_ORDERBY = "orderby";
 	private static final int PAGE_COUNT = 5;
+	protected static final String TAG = "MainFragment";
+	public static final int MAX_TIME = 60000;
+	public static final int INTERVAL = 100;
 
+	enum State {
+		INITIALIZING, READY, STARTED, RECORDING
+	}
+
+	private static Timer mTimer;
+	private static int mTimeLeft;
+	private static TimerTask mCurrentTimeTask;
+	
 	private TaskListAdapter mTaskListAdapter;
 	private boolean loading = false;
+	private State mState = State.STARTED;
+	private MediaRecorder mRecorder = null;
+	private String mFileName = null;
 
-	@InjectView(R.id.id_swipe_Refresh)
-	SwipeRefreshListLayout swipeRefreshLayout;
-	@InjectView(R.id.etMessage)
-	EditText editMessage; 
-	@InjectView(R.id.ivSend)
-	ImageView ivSend;
-	@InjectView(R.id.ivVoice)
-	ImageView ivVoice;
-	@InjectView(R.id.bSend)
-	View mSendButton;
-	@InjectView(R.id.bNew)
-	View mNewButton;
-	@InjectView(R.id.volume_envelope)
-	VolumeEnvelopeView mEnvelopeView;
-	@InjectView(R.id.voiceHeader)
-	View mVoiceHeaderView;
-	@InjectView(R.id.voiceRecTimeLeft)
-	TextView mVoiceRecTimeLeftView;
+	@InjectView(R.id.id_swipe_Refresh) SwipeRefreshListLayout swipeRefreshLayout;
+	@InjectView(R.id.etMessage) EditText editMessage; 
+	@InjectView(R.id.ivSend) ImageView ivSend;
+	@InjectView(R.id.ivVoice) ImageView ivVoice;
+	@InjectView(R.id.bSend) View mSendButton;
+	@InjectView(R.id.bNew) ImageView mNewButton;
+	@InjectView(R.id.volume_envelope) VolumeEnvelopeView mEnvelopeView;
+	@InjectView(R.id.voiceHeader) View mVoiceHeaderView;
+	@InjectView(R.id.voiceRecTimeLeft) TextView mVoiceRecTimeLeftView;
+	private MediaPlayer mPlayer;
 
 	/**
 	 * Returns a new instance of this fragment for the given section number.
@@ -94,7 +108,6 @@ public class MainFragment extends ListFragment implements
 	}
 
 	public MainFragment() {
-
 	}
 
 	@Override
@@ -127,7 +140,7 @@ public class MainFragment extends ListFragment implements
 					//sendMessage(friend.getName());
 				}
 				else {
-					//VoiceController.startRecording(MainActivity.this, friend.getName());
+					startRecording();
 				}
 
 				return true;
@@ -139,7 +152,7 @@ public class MainFragment extends ListFragment implements
 			public boolean onTouch(View v, MotionEvent event) {
 
 				if (event.getAction() == MotionEvent.ACTION_UP) {
-					if (true) {//VoiceController.isRecording()) {
+					if (isRecording()) {
 						if (editMessage.getText().toString().length() == 0) {
 
 							int width = mSendButton.getWidth();
@@ -153,21 +166,19 @@ public class MainFragment extends ListFragment implements
 
 								send = false;
 
-								//Utils.makeToast(MainActivity.this, getString(R.string.recording_cancelled));
-
+								Toast.makeText(getActivity(), "È¡Ïû¼ÇÂ¼ÓïÒô", Toast.LENGTH_SHORT).show();
 							}
 
 							final boolean finalSend = send;
 
-							//SurespotLog.d(TAG, "voice record up");
+							StoneLog.d(TAG, "voice record up");
 
 							// truncates without the delay for some reason
 							mSendButton.post(new Runnable() {
 
 								@Override
 								public void run() {
-									//VoiceController.stopRecording(MainActivity.this, finalSend);
-
+									stopRecording(finalSend);
 								}
 							});
 						}
@@ -201,6 +212,127 @@ public class MainFragment extends ListFragment implements
 			}
 		});
 		return view;
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		stopRecording(false);
+	}
+	
+	public synchronized void startRecording() {
+		if (!isRecording()) {
+			try {
+				if (mRecorder != null)
+					mRecorder.release();
+				
+				mEnvelopeView.setVisibility(View.VISIBLE);
+				mVoiceHeaderView.setVisibility(View.VISIBLE);
+				mVoiceRecTimeLeftView.setText(String.valueOf(MAX_TIME / 1000));
+				mEnvelopeView.clearVolume();
+
+				mRecorder = new MediaRecorder();
+				mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+				mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_NB);
+				mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+				mFileName = File.createTempFile("record", ".amr").getAbsolutePath();
+				mRecorder.setOutputFile(mFileName);
+				mRecorder.prepare();
+				
+				mRecorder.start();
+				startTimer(getActivity());
+				mState = State.RECORDING;
+			}
+			catch (IOException e) {
+				StoneLog.e(TAG, e, "prepare() failed");
+			}
+		}
+	}
+	
+	private void startTimer(final Activity activity) {
+		if (mTimer != null) {
+			mTimer.cancel();
+			mTimer.purge();
+		}
+
+		final int rate = INTERVAL;
+		mTimeLeft = MAX_TIME;
+		mTimer = new Timer();
+		mCurrentTimeTask = new TimerTask() {
+			public void run() {
+				activity.runOnUiThread(new Runnable() {
+					public void run() {
+
+						if (mState == State.RECORDING) {
+
+							mTimeLeft -= rate;
+
+							final int currentTimeLeft = (int) mTimeLeft;
+							
+							//SurespotLog.v(TAG, "currentTimeLeft: %d", currentTimeLeft);
+						
+							mEnvelopeView.setNewVolume(getMaxAmplitude(), true);
+
+							// if we're at a second boundary, update time display
+							if (currentTimeLeft % 1000 == 0) {
+								//SurespotLog.v(TAG, "currentTimeLeft mod: %d", currentTimeLeft%1000);	
+								mVoiceRecTimeLeftView.post(new Runnable() {
+
+									@Override
+									public void run() {
+										mVoiceRecTimeLeftView.setText(Integer.toString(currentTimeLeft / 1000));
+									}
+								});
+							}
+							
+							if (currentTimeLeft < -150) {
+								stopRecording(true);
+								return;
+							}
+
+							return;
+						}
+
+						mEnvelopeView.clearVolume();
+					}
+				});
+			}
+		};
+		mTimer.scheduleAtFixedRate(mCurrentTimeTask, 0, rate);
+	}
+	
+	public synchronized void stopRecording(boolean bSend) {
+		if (isRecording()) {
+			mTimer.cancel();
+			mTimer.purge();
+			mTimer = null;
+			mCurrentTimeTask = null;
+
+			mRecorder.stop();
+			mRecorder.release();
+			
+			mRecorder = null;
+			mState = State.READY;
+			
+			if (bSend) {
+			}
+			else {
+			}
+		}
+		
+		mEnvelopeView.setVisibility(View.GONE);
+		mVoiceHeaderView.setVisibility(View.GONE);
+	}
+	
+	public boolean isRecording() {
+		return mState == State.RECORDING;
+	}
+	
+	int getMaxAmplitude() {
+		if (mRecorder == null || mState != State.RECORDING)
+			return 0;
+		return mRecorder.getMaxAmplitude();
 	}
 
 	@Override
