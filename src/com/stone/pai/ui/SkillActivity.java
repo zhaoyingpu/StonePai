@@ -18,7 +18,7 @@ public class SkillActivity extends ListActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		getListView().setDividerHeight(0);
 		listAdapter = new SkillListAdapter(getBaseContext());
 		setListAdapter(listAdapter);
 		

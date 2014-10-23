@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -30,11 +31,11 @@
         android:layout_alignTop="@+id/editTexts">
 
         <ImageView
-            android:id="@+id/bQR"
+            android:id="@+id/bNew"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="5dp"
-            android:src="@drawable/qr_surespot" />
+            android:src="@drawable/ic_action_new" />
     </FrameLayout>
 
     <FrameLayout
@@ -103,6 +104,16 @@
             android:layout_height="wrap_content"
             android:background="#88000000" >
 
+            <com.stone.pai.voice.VolumeEnvelopeView
+                android:id="@+id/volume_envelope"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:background="#BB000000"
+                android:visibility="gone"
+                app:color="@color/surespotBlue" />
         </FrameLayout>
 
         <TextView

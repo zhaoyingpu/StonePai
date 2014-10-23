@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:orientation="horizontal" >
+
+    <ImageView
+        android:id="@+id/muser_info_image"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+    		android:layout_marginRight="8dp"
+        android:src="@drawable/avatar_placeholder" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/mUserName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="张雄 @zhangxiong"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/mTelPhone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="13812345678"
+            android:textColor="#333333" />
+
+        <TextView
+            android:id="@+id/mEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="zhangxiong@stone-automation.com"
+            android:textColor="#333333" />
+    </LinearLayout>
+
+</LinearLayout>

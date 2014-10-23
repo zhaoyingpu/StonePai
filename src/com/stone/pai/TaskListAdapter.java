@@ -49,8 +49,8 @@ public class TaskListAdapter extends ArrayAdapter<Task> {
 				.showImageOnLoading(R.drawable.avatar_placeholder_gray)
 				.showImageForEmptyUri(R.drawable.avatar_placeholder)
 				.showImageOnFail(R.drawable.avatar_placeholder_gray)
-				.delayBeforeLoading(200).cacheInMemory(true) // default
-				.cacheOnDisk(true) // default
+				.delayBeforeLoading(200).cacheInMemory(true) 
+				.cacheOnDisk(true) 
 				.build();
 	}
 
@@ -73,13 +73,14 @@ public class TaskListAdapter extends ArrayAdapter<Task> {
 
 	@Override
 	public Task getItem(int position) {
-		return (getItemViewType(position) != TYPE_LOADING) ? super
-				.getItem(position) : null;
+		return (getItemViewType(position) != TYPE_LOADING) ? 
+				super.getItem(position) : null;
 	}
 
 	@Override
 	public long getItemId(int position) {
-		return (getItemViewType(position) == TYPE_LOADING) ? position : -1;
+		return (getItemViewType(position) == TYPE_LOADING) ? 
+				position : -1;
 	}
 
 	@Override
